@@ -138,6 +138,7 @@ The script will:
 5. **Output**: Saves compressed video in same folder, removes suffix from filename
    - Example: `my_video xx.mp4` → `my_video.mp4`
 6. **State Tracking**: Updates JSON state files for web interface monitoring
+7. **Logging**: All operations logged to timestamped .txt file in `logs/` directory for later review
 
 ## Configuration
 
