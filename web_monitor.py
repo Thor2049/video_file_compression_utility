@@ -150,7 +150,9 @@ def main():
             original_size = item.get('original_size_mb', 0)
             compressed_size = item.get('compressed_size_mb', 0)
             compression_ratio = ((original_size - compressed_size) / original_size * 100) if original_size > 0 else 0
+            started_time = format_timestamp(item.get('started', 'Unknown'))
             completed_time = format_timestamp(item.get('completed', 'Unknown'))
+            duration = format_duration(item.get('duration_seconds', 0))
             
             with st.expander(f"{idx}. {input_path.name} → {output_path.name}"):
                 col1, col2 = st.columns(2)
@@ -158,13 +160,15 @@ def main():
                 with col1:
                     st.text(f"Input: {input_path}")
                     st.text(f"Original Size: {original_size:.2f} MB")
+                    st.text(f"Started: {started_time}")
                 
                 with col2:
                     st.text(f"Output: {output_path}")
                     st.text(f"Compressed Size: {compressed_size:.2f} MB")
+                    st.text(f"Completed: {completed_time}")
                 
+                st.text(f"Processing Time: {duration}")
                 st.text(f"Compression Ratio: {compression_ratio:.1f}% reduction")
-                st.text(f"Completed: {completed_time}")
     else:
         st.info("No files completed yet")
     
