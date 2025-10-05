@@ -129,6 +129,16 @@ class StateManager:
             'timestamp': datetime.now().isoformat()
         })
         StateManager.save_json(ERRORS_FILE, errors)
+    
+    @staticmethod
+    def clear_all_state():
+        """Clear all state files for fresh start"""
+        logger.info("Clearing all state files...")
+        StateManager.save_json(QUEUE_FILE, [])
+        StateManager.save_json(CURRENT_FILE, {})
+        StateManager.save_json(COMPLETED_FILE, [])
+        StateManager.save_json(ERRORS_FILE, [])
+        logger.info("All state files cleared.")
 
 
 class VideoFolderHandler(FileSystemEventHandler):
