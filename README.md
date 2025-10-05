@@ -2,6 +2,25 @@
 
 Automated video compression tool using HandbrakeCLI with NVIDIA's NVEnc H.265 encoder. Features intelligent resolution handling, real-time web monitoring, and strict file suffix validation to prevent data corruption.
 
+---
+
+## 🎓 Project Background
+
+This project was created as a **learning and \"vibe coding\" experiment** using **Claude Sonnet 3.5** via **[Emergent.sh](https://emergent.sh)** – an AI-powered development platform. The goal was to explore automated video processing workflows and build something practical while learning.
+
+**Important Notes:**
+- 📌 **HandBrake's GUI application is significantly better** than this command-line implementation for most use cases. If you need a robust, feature-rich video encoding tool, use [HandBrake](https://handbrake.fr/) directly.
+- 📌 Similar projects likely exist in the wild – this was primarily a **personal learning exercise** in automation, Python scripting, and AI-assisted development.
+- 📌 Feel free to copy, modify, fork, or use this code however you'd like. It's here to share and learn from!
+
+**Acknowledgments:**
+- Built with guidance from **Claude Sonnet 3.5** (Anthropic)
+- Developed on **[Emergent.sh](https://emergent.sh)** – an AI development platform
+- Powered by **HandBrake CLI** for video encoding
+- Uses **NVIDIA NVEnc** for GPU-accelerated H.265 compression
+
+If you're looking to learn about Python automation, file processing, or AI-assisted development, hopefully this project provides some useful examples!
+
 ## Features
 
 - **Automated Folder Monitoring**: Watches specified directory for new folders containing video files
