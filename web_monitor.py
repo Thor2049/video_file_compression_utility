@@ -135,22 +135,6 @@ def main():
     
     st.markdown("---")
     
-    # Queue Section
-    st.header("📋 Processing Queue")
-    if queue:
-        st.write(f"**{len(queue)} file(s) waiting to be processed**")
-        for idx, item in enumerate(queue, 1):
-            file_path = Path(item['path'])
-            added_time = format_timestamp(item.get('added', 'Unknown'))
-            
-            with st.expander(f"{idx}. {file_path.name}"):
-                st.text(f"Path: {file_path}")
-                st.text(f"Added: {added_time}")
-    else:
-        st.success("Queue is empty")
-    
-    st.markdown("---")
-    
     # Completed Section
     st.header("✅ Completed Files")
     if completed:
