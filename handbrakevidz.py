@@ -85,15 +85,26 @@ class StateManager:
         StateManager.save_json(CURRENT_FILE, {})
     
     @staticmethod
-    def add_completed(file_path, output_path, original_size, compressed_size):
+    def add_completed(file_path, output_path, original_size, compressed_size, started_time):
         """Add to completed list"""
         completed = StateManager.load_json(COMPLETED_FILE)
+        completed_time = datetime.now()
+        
+        # Calculate duration
+        try:
+            start_dt = datetime.fromisoformat(started_time)
+            duration_seconds = (completed_time - start_dt).total_seconds()
+        except:
+            duration_seconds = 0
+        
         completed.append({
             'input': str(file_path),
             'output': str(output_path),
             'original_size_mb': round(original_size / (1024*1024), 2),
             'compressed_size_mb': round(compressed_size / (1024*1024), 2),
-            'completed': datetime.now().isoformat()
+            'started': started_time,
+            'completed': completed_time.isoformat(),
+            'duration_seconds': round(duration_seconds, 1)
         })
         StateManager.save_json(COMPLETED_FILE, completed)
     
