@@ -23,6 +23,7 @@ The script **only** processes video files with the following suffix patterns:
 - `filename  xx.mkv` (double space + xx)
 - `filename XX.avi` (uppercase XX)
 - `filename  XX.wmv` (any combination of 1-2 spaces + xx/XX case-insensitive)
+- `filename xx.mpg` (MPG format support)
 
 **Important**: Files without this suffix pattern will be **skipped** to prevent accidental corruption.
 
