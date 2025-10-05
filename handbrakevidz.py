@@ -151,23 +151,71 @@ class VideoFolderHandler(FileSystemEventHandler):
         video_files = self.find_video_files(folder_path)
         
         if not video_files:
-            logger.info(f"No video files found in {folder_name}")
+            logger.info(f"No file found matching the required suffix in {folder_path}. Skipping.")
+            StateManager.add_error(str(folder_path), "No files with required suffix found")
             return
+        
+        # Add all files to queue
+        for video_file in video_files:
+            StateManager.add_to_queue(video_file)
         
         # Process each video file
         for video_file in video_files:
             self.compress_video(video_file)
     
+    def is_valid_suffix(self, filename):
+        """
+        Check if filename has valid suffix pattern.
+        Pattern: 1-2 spaces followed by 'xx' or 'XX' before extension
+        Supports: .mp4, .mkv, .avi, .wmv
+        Examples: "file xx.mp4", "file  XX.mkv", "video  xx.avi"
+        """
+        pattern = r'[\s]{1,2}[xX]{2}\.(mp4|mkv|avi|wmv)$'
+        return bool(re.search(pattern, filename))
+    
     def find_video_files(self, folder_path):
-        """Find video files in the folder with .mp4 or .mkv extensions"""
+        """Find video files with required suffix in the folder"""
         video_files = []
         
         for root, _, files in os.walk(folder_path):
             for file in files:
-                if file.lower().endswith(('.mp4', '.mkv')):
+                # Check if file has valid suffix
+                if self.is_valid_suffix(file):
                     video_files.append(Path(root) / file)
+                elif file.lower().endswith(('.mp4', '.mkv', '.avi', '.wmv')):
+                    # Log files that have video extensions but wrong suffix
+                    logger.warning(f"Skipping '{file}' - missing required suffix pattern")
         
         return video_files
+    
+    def get_video_resolution(self, video_path):
+        """
+        Use ffprobe to get the vertical resolution of the video.
+        Returns height in pixels (e.g., 480, 720, 1080)
+        """
+        try:
+            cmd = [
+                'ffprobe',
+                '-v', 'error',
+                '-select_streams', 'v:0',
+                '-show_entries', 'stream=height',
+                '-of', 'csv=p=0',
+                str(video_path)
+            ]
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            height = int(result.stdout.strip())
+            logger.info(f"Detected resolution: {height}p for {video_path.name}")
+            return height
+        except subprocess.CalledProcessError as e:
+            logger.error(f"ffprobe error: {e}")
+            logger.error(f"Error output: {e.stderr}")
+            return None
+        except ValueError as e:
+            logger.error(f"Could not parse resolution: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"Unexpected error detecting resolution: {e}")
+            return None
     
     def compress_video(self, video_path):
         """Compress a video file using Handbrake"""
