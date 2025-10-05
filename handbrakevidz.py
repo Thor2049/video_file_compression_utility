@@ -215,8 +215,10 @@ class VideoFolderHandler(FileSystemEventHandler):
                 if self.is_valid_suffix(file):
                     video_files.append(Path(root) / file)
                 elif file.lower().endswith(('.mp4', '.mkv', '.avi', '.wmv', '.mpg')):
-                    # Log files that have video extensions but wrong suffix
+                    # File has video extension but wrong suffix - add to errors
+                    file_path = Path(root) / file
                     logger.warning(f"Skipping '{file}' - missing required suffix pattern")
+                    StateManager.add_error(str(file_path), "Missing required suffix pattern (space + xx/XX)")
         
         return video_files
     
