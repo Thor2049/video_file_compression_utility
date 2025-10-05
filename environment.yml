@@ -1,0 +1,10 @@
+name: video-compression
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+      - watchdog==3.0.0
+      - streamlit==1.29.0
