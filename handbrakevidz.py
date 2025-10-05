@@ -16,6 +16,96 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 logger = logging.getLogger(__name__)
+# State files for web interface
+STATE_DIR = Path(__file__).parent / 'state'
+STATE_DIR.mkdir(exist_ok=True)
+
+QUEUE_FILE = STATE_DIR / 'queue.json'
+CURRENT_FILE = STATE_DIR / 'current.json'
+COMPLETED_FILE = STATE_DIR / 'completed.json'
+ERRORS_FILE = STATE_DIR / 'errors.json'
+
+
+class StateManager:
+    """Manages state files for web interface communication"""
+    
+    @staticmethod
+    def load_json(file_path):
+        """Load JSON file, return empty list if not exists"""
+        try:
+            if file_path.exists():
+                with open(file_path, 'r') as f:
+                    return json.load(f)
+        except Exception as e:
+            logger.error(f"Error loading {file_path}: {e}")
+        return []
+    
+    @staticmethod
+    def save_json(file_path, data):
+        """Save data to JSON file"""
+        try:
+            with open(file_path, 'w') as f:
+                json.dump(data, f, indent=2)
+        except Exception as e:
+            logger.error(f"Error saving {file_path}: {e}")
+    
+    @staticmethod
+    def add_to_queue(file_path):
+        """Add file to processing queue"""
+        queue = StateManager.load_json(QUEUE_FILE)
+        queue.append({
+            'path': str(file_path),
+            'added': datetime.now().isoformat()
+        })
+        StateManager.save_json(QUEUE_FILE, queue)
+    
+    @staticmethod
+    def remove_from_queue(file_path):
+        """Remove file from queue"""
+        queue = StateManager.load_json(QUEUE_FILE)
+        queue = [item for item in queue if item['path'] != str(file_path)]
+        StateManager.save_json(QUEUE_FILE, queue)
+    
+    @staticmethod
+    def set_current(file_path, progress=0, eta='Unknown'):
+        """Update current processing file"""
+        current = {
+            'path': str(file_path),
+            'progress': progress,
+            'eta': eta,
+            'started': datetime.now().isoformat()
+        }
+        StateManager.save_json(CURRENT_FILE, current)
+    
+    @staticmethod
+    def clear_current():
+        """Clear current processing file"""
+        StateManager.save_json(CURRENT_FILE, {})
+    
+    @staticmethod
+    def add_completed(file_path, output_path, original_size, compressed_size):
+        """Add to completed list"""
+        completed = StateManager.load_json(COMPLETED_FILE)
+        completed.append({
+            'input': str(file_path),
+            'output': str(output_path),
+            'original_size_mb': round(original_size / (1024*1024), 2),
+            'compressed_size_mb': round(compressed_size / (1024*1024), 2),
+            'completed': datetime.now().isoformat()
+        })
+        StateManager.save_json(COMPLETED_FILE, completed)
+    
+    @staticmethod
+    def add_error(file_path, reason):
+        """Add to errors list"""
+        errors = StateManager.load_json(ERRORS_FILE)
+        errors.append({
+            'path': str(file_path),
+            'reason': reason,
+            'timestamp': datetime.now().isoformat()
+        })
+        StateManager.save_json(ERRORS_FILE, errors)
+
 
 class VideoFolderHandler(FileSystemEventHandler):
     def __init__(self, watch_dir, handbrake_path, processed_folders=None):
