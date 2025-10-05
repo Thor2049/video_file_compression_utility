@@ -486,8 +486,11 @@ def main():
     except KeyboardInterrupt:
         logger.info("Monitoring stopped by user.")
         observer.stop()
+        observer.join()
+        
+        # Clear all state files for clean restart next time
+        StateManager.clear_all_state()
     
-    observer.join()
     logger.info("Script terminated gracefully.")
     return 0
 
