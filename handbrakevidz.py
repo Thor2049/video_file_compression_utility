@@ -233,6 +233,9 @@ class VideoFolderHandler(FileSystemEventHandler):
         # Remove from queue
         StateManager.remove_from_queue(video_path)
         
+        # Track start time
+        started_time = datetime.now().isoformat()
+        
         # Set as current
         StateManager.set_current(video_path, progress=0)
         
