@@ -11,7 +11,7 @@ Automated video compression tool using HandbrakeCLI with NVIDIA's NVEnc H.265 en
   - Preserves original resolution for videos ≤540p
   - Downscales to 480p for videos >540p
 - **Strict Suffix Validation**: Only processes files with specific naming patterns to prevent accidental overwrites
-- **Multi-Format Support**: Handles .mp4, .mkv, .avi, and .wmv files
+- **Multi-Format Support**: Handles .mp4, .mkv, .avi, .wmv, and .mpg files
 - **Real-Time Web Interface**: Streamlit dashboard showing queue, progress, completed files, and errors
 - **Graceful Shutdown**: Handles Ctrl+C for clean termination
 
