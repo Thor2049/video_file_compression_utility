@@ -178,10 +178,10 @@ class VideoFolderHandler(FileSystemEventHandler):
         """
         Check if filename has valid suffix pattern.
         Pattern: 1-2 spaces followed by 'xx' or 'XX' before extension
-        Supports: .mp4, .mkv, .avi, .wmv
+        Supports: .mp4, .mkv, .avi, .wmv, .mpg
         Examples: "file xx.mp4", "file  XX.mkv", "video  xx.avi"
         """
-        pattern = r'[\s]{1,2}[xX]{2}\.(mp4|mkv|avi|wmv)$'
+        pattern = r'[\s]{1,2}[xX]{2}\.(mp4|mkv|avi|wmv|mpg)$'
         return bool(re.search(pattern, filename))
     
     def find_video_files(self, folder_path):
