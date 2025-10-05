@@ -49,6 +49,24 @@ def format_timestamp(iso_timestamp):
         return iso_timestamp
 
 
+def format_duration(seconds):
+    """Format duration in seconds to readable format"""
+    try:
+        seconds = int(seconds)
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        secs = seconds % 60
+        
+        if hours > 0:
+            return f"{hours}h {minutes}m {secs}s"
+        elif minutes > 0:
+            return f"{minutes}m {secs}s"
+        else:
+            return f"{secs}s"
+    except:
+        return "Unknown"
+
+
 def main():
     # Header
     st.title("🎬 Video Compression Monitor")
