@@ -13,6 +13,8 @@ Automated video compression tool using HandbrakeCLI with NVIDIA's NVEnc H.265 en
 - **Strict Suffix Validation**: Only processes files with specific naming patterns to prevent accidental overwrites
 - **Multi-Format Support**: Handles .mp4, .mkv, .avi, .wmv, and .mpg files
 - **Real-Time Web Interface**: Streamlit dashboard showing current processing, completed files, and errors
+- **Comprehensive Logging**: All operations logged to timestamped .txt files in logs/ directory
+- **Clean State Management**: State files automatically cleared on shutdown for fresh start
 - **Graceful Shutdown**: Handles Ctrl+C for clean termination
 
 ## Supported File Patterns
