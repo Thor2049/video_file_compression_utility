@@ -27,6 +27,7 @@ test_files = [
     ("movie  XX.mkv", True),
     ("clip xx.avi", True),
     ("clip  xx.wmv", True),
+    ("show xx.mpg", True),
     ("my video xx.mp4", True),
     ("my_video  XX.mkv", True),
     
