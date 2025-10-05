@@ -11,13 +11,24 @@ from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-# Set up logging
+# Create logs directory
+LOGS_DIR = Path(__file__).parent / 'logs'
+LOGS_DIR.mkdir(exist_ok=True)
+
+# Set up logging with both console and file output
+log_filename = LOGS_DIR / f'compression_{datetime.now().strftime("%Y%m%d_%H%M%S")}.txt'
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    datefmt='%Y-%m-%d %H:%M:%S',
+    handlers=[
+        logging.FileHandler(log_filename),
+        logging.StreamHandler()
+    ]
 )
 logger = logging.getLogger(__name__)
+logger.info(f"Log file created: {log_filename}")
+
 # State files for web interface
 STATE_DIR = Path(__file__).parent / 'state'
 STATE_DIR.mkdir(exist_ok=True)
