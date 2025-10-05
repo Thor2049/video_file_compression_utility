@@ -146,7 +146,7 @@ Default HandbrakeCLI settings (edit in `handbrakevidz.py` if needed):
 
 ### Supported Video Extensions
 
-Currently supports: `.mp4`, `.mkv`, `.avi`, `.wmv`
+Currently supports: `.mp4`, `.mkv`, `.avi`, `.wmv`, `.mpg`
 
 To add more, edit the regex pattern in `is_valid_suffix()` method.
 
