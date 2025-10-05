@@ -113,11 +113,19 @@ This will open a web browser with the monitoring dashboard at `http://localhost:
 The dashboard shows:
 - **Current Processing**: File being encoded with progress percentage and started timestamp
 - **Completed**: Successfully compressed files with size reduction stats, started/completed timestamps, and processing duration
-- **Errors/Skipped**: Files that were skipped or failed with reasons
+- **Errors/Skipped**: Files that were skipped or failed with reasons (includes files with wrong suffix)
 
 ### Stopping the Script
 
 Press `Ctrl+C` in the terminal running `handbrakevidz.py` for graceful shutdown.
+
+The script will:
+- Stop monitoring for new folders
+- Complete current file processing (if any)
+- Clear all state files (queue, current, completed, errors) for fresh start next time
+- Clean up and exit gracefully
+
+**Note**: Log files are preserved in the `logs/` directory for later review.
 
 ## How It Works
 
