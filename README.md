@@ -109,9 +109,8 @@ streamlit run web_monitor.py
 This will open a web browser with the monitoring dashboard at `http://localhost:8501`
 
 The dashboard shows:
-- **Current Processing**: File being encoded with progress percentage
-- **Queue**: Files waiting to be processed
-- **Completed**: Successfully compressed files with size reduction stats
+- **Current Processing**: File being encoded with progress percentage and started timestamp
+- **Completed**: Successfully compressed files with size reduction stats, started/completed timestamps, and processing duration
 - **Errors/Skipped**: Files that were skipped or failed with reasons
 
 ### Stopping the Script
