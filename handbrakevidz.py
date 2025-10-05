@@ -394,9 +394,12 @@ class VideoFolderHandler(FileSystemEventHandler):
             return False
 
 def main():
-    parser = argparse.ArgumentParser(description='Monitor a folder for new folders with video files and compress them using HandbrakeCLI')
+    parser = argparse.ArgumentParser(
+        description='Monitor a folder for new folders with video files and compress them using HandbrakeCLI with NVEnc H.265'
+    )
     parser.add_argument('--watch', required=True, help='Directory to watch for new folders')
-    parser.add_argument('--handbrake', default='HandBrakeCLI', help='Path to HandbrakeCLI executable (default assumes it is in PATH)')
+    parser.add_argument('--handbrake', default='HandBrakeCLI', 
+                       help='Path to HandbrakeCLI executable (default assumes it is in PATH)')
     args = parser.parse_args()
     
     # Full path to HandbrakeCLI executable
@@ -404,7 +407,6 @@ def main():
     
     # Verify HandbrakeCLI is accessible
     try:
-        # Basic test command to check if HandbrakeCLI is accessible
         test_cmd = [handbrake_path, '--version']
         result = subprocess.run(test_cmd, capture_output=True, text=True)
         logger.info(f"HandbrakeCLI version: {result.stdout.strip()}")
@@ -414,6 +416,16 @@ def main():
         logger.error("Try running this script as administrator or with elevated privileges.")
         return 1
     
+    # Verify ffprobe is accessible (for resolution detection)
+    try:
+        test_cmd = ['ffprobe', '-version']
+        result = subprocess.run(test_cmd, capture_output=True, text=True)
+        logger.info(f"ffprobe is available: {result.stdout.split()[0]}")
+    except Exception as e:
+        logger.error(f"Error accessing ffprobe: {str(e)}")
+        logger.error("ffprobe is required for resolution detection. Please install ffmpeg.")
+        return 1
+    
     watch_dir = Path(args.watch).resolve()
     
     if not watch_dir.exists() or not watch_dir.is_dir():
@@ -421,7 +433,8 @@ def main():
         return 1
     
     logger.info(f"Starting to monitor: {watch_dir}")
-    logger.info("Output will be saved to the same directories as source files")
+    logger.info(f"Output will be saved to the same directories as source files")
+    logger.info(f"State files for web interface: {STATE_DIR}")
     
     # Create event handler and observer
     event_handler = VideoFolderHandler(watch_dir, handbrake_path)
@@ -438,7 +451,9 @@ def main():
         observer.stop()
     
     observer.join()
+    logger.info("Script terminated gracefully.")
     return 0
+
 
 if __name__ == "__main__":
     exit(main())
