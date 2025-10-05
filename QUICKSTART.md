@@ -74,6 +74,7 @@ streamlit run web_monitor.py
 - `family_movie  XX.mkv`
 - `presentation xx.avi`
 - `tutorial  xx.wmv`
+- `episode xx.mpg`
 
 ### ✗ Invalid (will be skipped)
 - `vacation_2024.mp4` (no suffix)
