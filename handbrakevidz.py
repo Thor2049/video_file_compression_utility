@@ -198,7 +198,7 @@ def main():
         return 1
     
     logger.info(f"Starting to monitor: {watch_dir}")
-    logger.info(f"Output will be saved to the same directories as source files")
+    logger.info("Output will be saved to the same directories as source files")
     
     # Create event handler and observer
     event_handler = VideoFolderHandler(watch_dir, handbrake_path)
