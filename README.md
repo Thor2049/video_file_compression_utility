@@ -171,9 +171,9 @@ To add more, edit the regex pattern in `is_valid_suffix()` method.
 
 The script creates a `state/` directory with JSON files for monitoring:
 
-- **queue.json**: List of files waiting to be processed
-- **current.json**: Current file being processed with progress
-- **completed.json**: History of successfully compressed files
+- **queue.json**: List of files waiting to be processed (updates quickly as files move to processing)
+- **current.json**: Current file being processed with progress and started timestamp
+- **completed.json**: History of successfully compressed files with started/completed timestamps and duration
 - **errors.json**: Log of skipped or failed files with reasons
 
 These files enable the web interface to display real-time status.
