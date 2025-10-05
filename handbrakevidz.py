@@ -383,7 +383,7 @@ class VideoFolderHandler(FileSystemEventHandler):
                 logger.info(f"Compressed size: {compressed_size / (1024*1024):.2f} MB")
                 
                 # Add to completed
-                StateManager.add_completed(video_path, output_path, original_size, compressed_size)
+                StateManager.add_completed(video_path, output_path, original_size, compressed_size, started_time)
                 StateManager.clear_current()
             else:
                 logger.error(f"Output file was not created at: {output_path}")
