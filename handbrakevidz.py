@@ -193,7 +193,7 @@ class VideoFolderHandler(FileSystemEventHandler):
                 # Check if file has valid suffix
                 if self.is_valid_suffix(file):
                     video_files.append(Path(root) / file)
-                elif file.lower().endswith(('.mp4', '.mkv', '.avi', '.wmv')):
+                elif file.lower().endswith(('.mp4', '.mkv', '.avi', '.wmv', '.mpg')):
                     # Log files that have video extensions but wrong suffix
                     logger.warning(f"Skipping '{file}' - missing required suffix pattern")
         
