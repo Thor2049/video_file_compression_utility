@@ -91,25 +91,21 @@ def main():
         return
     
     # Load all state data
-    queue = load_json(QUEUE_FILE)
     current = load_json(CURRENT_FILE)
     completed = load_json(COMPLETED_FILE)
     errors = load_json(ERRORS_FILE)
     
     # Display stats in columns
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.metric("Queue", len(queue))
-    
-    with col2:
         is_processing = bool(current and 'path' in current)
         st.metric("Processing", "Yes" if is_processing else "No")
     
-    with col3:
+    with col2:
         st.metric("Completed", len(completed))
     
-    with col4:
+    with col3:
         st.metric("Errors/Skipped", len(errors))
     
     st.markdown("---")
