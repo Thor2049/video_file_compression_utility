@@ -218,28 +218,49 @@ class VideoFolderHandler(FileSystemEventHandler):
             return None
     
     def compress_video(self, video_path):
-        """Compress a video file using Handbrake"""
-        # Extract the file name and handle different suffix patterns
+        """Compress a video file using HandbrakeCLI with NVEnc H.265"""
+        # Remove from queue
+        StateManager.remove_from_queue(video_path)
+        
+        # Set as current
+        StateManager.set_current(video_path, progress=0)
+        
         file_name = video_path.name
         
-        # Check for both " xx." and "  xx." patterns
-        if " xx." in file_name:
-            new_file_name = file_name.replace(" xx.", ".")
-        elif "  xx." in file_name:
-            new_file_name = file_name.replace("  xx.", ".")
-        else:
-            # If no match, just use the original name but ensure mp4 extension
-            new_file_name = file_name
-            
+        # Extract new filename by removing the suffix pattern
+        # Match 1-2 spaces followed by xx/XX before extension
+        new_file_name = re.sub(r'[\s]{1,2}[xX]{2}\.', '.', file_name)
+        
         # Use .mp4 as output extension regardless of input
         output_file_name = Path(new_file_name).stem + '.mp4'
         output_path = video_path.parent / output_file_name
         
+        # Check if output already exists to prevent overwrite
+        if output_path.exists():
+            logger.warning(f"Output file already exists: {output_path}. Skipping to prevent overwrite.")
+            StateManager.add_error(str(video_path), "Output file already exists")
+            StateManager.clear_current()
+            return False
+        
+        # Get original file size
+        original_size = video_path.stat().st_size
+        
         # Log the full paths for debugging
         logger.info(f"Input file path: {video_path}")
         logger.info(f"Output file path: {output_path}")
-        
         logger.info(f"Compressing: {file_name} -> {output_file_name}")
+        
+        # Detect source resolution
+        source_height = self.get_video_resolution(video_path)
+        
+        # Determine if we should downscale
+        # If resolution is 540p or lower, keep original resolution
+        should_downscale = True
+        if source_height is not None and source_height <= 540:
+            should_downscale = False
+            logger.info(f"Source resolution ({source_height}p) is ≤540p, keeping original resolution")
+        else:
+            logger.info(f"Source resolution is >540p or unknown, downscaling to 480p")
         
         # Build HandbrakeCLI command
         cmd = [
@@ -249,7 +270,14 @@ class VideoFolderHandler(FileSystemEventHandler):
             '--preset-import-file', 'none',  # Prevent loading user presets
             '-e', 'nvenc_h265',  # Use NVEnc H.265 encoder
             '-q', '22',  # Quality setting
-            '--height', '480',  # Set maximum height to 480p
+        ]
+        
+        # Add resolution settings
+        if should_downscale:
+            cmd.extend(['--height', '480'])  # Downscale to 480p
+        
+        # Add common settings
+        cmd.extend([
             '--keep-display-aspect',  # Maintain aspect ratio
             '-O',  # Optimize for web
             '--all-audio',  # Keep all audio tracks
@@ -257,10 +285,13 @@ class VideoFolderHandler(FileSystemEventHandler):
             '--copy-timestamps',  # Preserve timestamps
             '--native-language', 'eng',  # Set native language
             '--non-anamorphic',  # Disable anamorphic
-        ]
+        ])
         
         try:
             logger.info(f"Running command: {' '.join(str(c) for c in cmd)}")
+            
+            # Update progress
+            StateManager.set_current(video_path, progress=10, eta='Calculating...')
             
             # Use shell=True on Windows to help with permissions
             if os.name == 'nt':  # Windows
@@ -269,15 +300,49 @@ class VideoFolderHandler(FileSystemEventHandler):
                 input_file = f'"{video_path}"' 
                 output_file = f'"{output_path}"'
                 
-                # Execute the command with proper quoting and NVEnc encoder
-                command_str = f'{handbrake_exe} -i {input_file} -o {output_file} -e nvenc_h265 -q 22 --height 480 --keep-display-aspect -O --all-audio --all-subtitles --native-language eng --non-anamorphic'
+                # Build command string
+                command_parts = [
+                    handbrake_exe,
+                    '-i', input_file,
+                    '-o', output_file,
+                    '-e nvenc_h265',
+                    '-q 22'
+                ]
+                
+                if should_downscale:
+                    command_parts.append('--height 480')
+                
+                command_parts.extend([
+                    '--keep-display-aspect',
+                    '-O',
+                    '--all-audio',
+                    '--all-subtitles',
+                    '--native-language eng',
+                    '--non-anamorphic'
+                ])
+                
+                command_str = ' '.join(command_parts)
                 logger.info(f"Windows command: {command_str}")
                 
                 # Run with more explicit output handling
-                process = subprocess.Popen(command_str, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                process = subprocess.Popen(
+                    command_str, 
+                    shell=True, 
+                    stdout=subprocess.PIPE, 
+                    stderr=subprocess.PIPE, 
+                    text=True
+                )
                 
-                # Print output in real-time
+                # Print output in real-time and update progress
                 logger.info("HandbrakeCLI is running. This may take a while...")
+                
+                # Simulate progress updates (HandbrakeCLI doesn't provide easy progress)
+                for progress in range(20, 90, 10):
+                    if process.poll() is not None:
+                        break
+                    time.sleep(5)
+                    StateManager.set_current(video_path, progress=progress, eta='Processing...')
+                
                 stdout, stderr = process.communicate()
                 
                 if stdout:
@@ -288,26 +353,44 @@ class VideoFolderHandler(FileSystemEventHandler):
                 if process.returncode != 0:
                     raise subprocess.CalledProcessError(process.returncode, command_str)
             else:
+                # Unix/Linux
                 result = subprocess.run(cmd, check=True, capture_output=True, text=True)
                 if result.stdout:
                     logger.info(f"Command output: {result.stdout}")
             
+            # Update to completion
+            StateManager.set_current(video_path, progress=95, eta='Finalizing...')
+            
             # Verify the output file exists
             if output_path.exists():
+                compressed_size = output_path.stat().st_size
                 logger.info(f"Successfully created output file: {output_path}")
-                file_size = output_path.stat().st_size
-                logger.info(f"Output file size: {file_size / (1024*1024):.2f} MB")
+                logger.info(f"Original size: {original_size / (1024*1024):.2f} MB")
+                logger.info(f"Compressed size: {compressed_size / (1024*1024):.2f} MB")
+                
+                # Add to completed
+                StateManager.add_completed(video_path, output_path, original_size, compressed_size)
+                StateManager.clear_current()
             else:
                 logger.error(f"Output file was not created at: {output_path}")
+                StateManager.add_error(str(video_path), "Output file not created")
+                StateManager.clear_current()
+                return False
                 
             logger.info(f"Compression completed for {file_name}")
             return True
+            
         except subprocess.CalledProcessError as e:
             logger.error(f"HandbrakeCLI error: {e}")
-            logger.error(f"Error output: {e.stderr}")
+            if hasattr(e, 'stderr') and e.stderr:
+                logger.error(f"Error output: {e.stderr}")
+            StateManager.add_error(str(video_path), f"HandbrakeCLI error: {str(e)}")
+            StateManager.clear_current()
             return False
         except Exception as e:
             logger.error(f"Unexpected error: {str(e)}")
+            StateManager.add_error(str(video_path), f"Unexpected error: {str(e)}")
+            StateManager.clear_current()
             return False
 
 def main():
