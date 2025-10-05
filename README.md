@@ -162,6 +162,8 @@ To add more, edit the regex pattern in `is_valid_suffix()` method.
 ├── environment.yml          # Conda environment specification
 ├── README.md                # This file
 ├── LICENSE                  # License file
+├── logs/                    # Created automatically
+│   └── compression_YYYYMMDD_HHMMSS.txt  # Timestamped log files
 └── state/                   # Created automatically
     ├── queue.json           # Files waiting to process
     ├── current.json         # Currently processing file
